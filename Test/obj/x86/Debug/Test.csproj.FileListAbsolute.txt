@@ -1,0 +1,30 @@
+F:\2015\Konke\Test\bin\Debug\Test.exe.config
+F:\2015\Konke\Test\bin\Debug\Test.exe
+F:\2015\Konke\Test\bin\Debug\Test.pdb
+F:\2015\Konke\Test\bin\Debug\Konke.dll
+F:\2015\Konke\Test\bin\Debug\Konke.pdb
+F:\2015\Konke\Test\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\2015\Konke\Test\obj\x86\Debug\Test.Form1.resources
+F:\2015\Konke\Test\obj\x86\Debug\Test.Properties.Resources.resources
+F:\2015\Konke\Test\obj\x86\Debug\GenerateResource.read.1.tlog
+F:\2015\Konke\Test\obj\x86\Debug\GenerateResource.write.1.tlog
+F:\2015\Konke\Test\obj\x86\Debug\Test.exe
+F:\2015\Konke\Test\obj\x86\Debug\Test.pdb
+F:\2015\Konke\Test\bin\Debug\Newtonsoft.Json.dll
+F:\2015\Konke\Test\bin\Debug\Newtonsoft.Json.xml
+F:\2015 Backup\Konke\Test\bin\Debug\Test.exe.config
+F:\2015 Backup\Konke\Test\obj\x86\Debug\Test.exe
+F:\2015 Backup\Konke\Test\obj\x86\Debug\Test.pdb
+F:\2016\Konke\Test\bin\Debug\Test.exe.config
+F:\2016\Konke\Test\obj\x86\Debug\Test.exe
+F:\2016\Konke\Test\obj\x86\Debug\Test.pdb
+F:\2016\Konke\Test\bin\Debug\Test.exe
+F:\2016\Konke\Test\bin\Debug\Test.pdb
+F:\2016\Konke\Test\bin\Debug\Konke.dll
+F:\2016\Konke\Test\bin\Debug\Newtonsoft.Json.dll
+F:\2016\Konke\Test\bin\Debug\Konke.pdb
+F:\2016\Konke\Test\bin\Debug\Newtonsoft.Json.xml
+F:\2016\Konke\Test\obj\x86\Debug\Test.csprojResolveAssemblyReference.cache
+F:\2016\Konke\Test\obj\x86\Debug\Test.Form1.resources
+F:\2016\Konke\Test\obj\x86\Debug\Test.Properties.Resources.resources
+F:\2016\Konke\Test\obj\x86\Debug\Test.csproj.GenerateResource.Cache
