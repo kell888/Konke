@@ -178,6 +178,16 @@ namespace Konke
             }
             return "";
         }
+        string userid;
+        public string UserID
+        {
+            get
+            {
+                if (userid == null)
+                    UserId();
+                return userid;
+            }
+        }
 
         public string UserId(string accesstoken = null)
         {
@@ -197,7 +207,8 @@ namespace Konke
                 JToken user = u as JToken;
                 if (user != null)
                 {
-                    return user.SelectToken("userid").ToString();
+                    userid = user.SelectToken("userid").ToString();
+                    return userid;
                 }
             }
             else
@@ -372,10 +383,13 @@ namespace Konke
         private static List<JToken> GetChildren(JToken token)
         {
             List<JToken> tokens = new List<JToken>();
-            JEnumerable<JToken> ts = token.Children();
-            foreach (JToken t in ts)
+            if (token != null)
             {
-                tokens.Add(t);
+                JEnumerable<JToken> ts = token.Children();
+                foreach (JToken t in ts)
+                {
+                    tokens.Add(t);
+                }
             }
             return tokens;
         }
@@ -386,7 +400,7 @@ namespace Konke
             {
                 JToken t = token.SelectToken(name);
                 if (t != null)
-                    return token.SelectToken(name).ToString();
+                    return t.ToString();
             }
             return "";
         }
@@ -598,7 +612,7 @@ namespace Konke
 
         public bool Turn(string kid, bool onOrOff = true)
         {
-            string userid = UserId();
+            string userid = UserID;
             if (userid != "")
             {
                 return DoSwitchK(_accesstoken, userid, kid, onOrOff ? 1 : 0);
@@ -635,7 +649,7 @@ namespace Konke
         public List<ElectricityInfoMonth> GetElectricityByMonth(string kid)
         {
             List<ElectricityInfoMonth> electricities = new List<ElectricityInfoMonth>();
-            string userid = UserId();
+            string userid = UserID;
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getKElectricityByMonth";
@@ -679,7 +693,7 @@ namespace Konke
         public List<ElectricityInfoDay> GetElectricityByDay(string kid)
         {
             List<ElectricityInfoDay> electricities = new List<ElectricityInfoDay>();
-            string userid = UserId();
+            string userid = UserID;
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getKElectricityByDay";
@@ -724,7 +738,7 @@ namespace Konke
         public List<ElectricityInfoHour> GetElectricityByHour(string kid)
         {
             List<ElectricityInfoHour> electricities = new List<ElectricityInfoHour>();
-            string userid = UserId();
+            string userid = UserID;
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getKElectricityByHour";
@@ -770,7 +784,7 @@ namespace Konke
         public List<EnviromentInfo> GetEnviromentInfo(string kid)
         {
             List<EnviromentInfo> infos = new List<EnviromentInfo>();
-            string userid = UserId();
+            string userid = UserID;
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getEnvironmentInfo";
@@ -801,7 +815,7 @@ namespace Konke
                                     string _illumination = GetJsonValue(e, "illumination");
                                     string _temperature = GetJsonValue(e, "temperature");
                                     string _humidity = GetJsonValue(e, "humidity");
-                                    EnviromentInfo info = new EnviromentInfo() { hour = DateTime.Parse(day + " " + date[3] + "00:00"), illumination = Convert.ToByte(_illumination), temperature = Convert.ToSingle(_temperature), humidity = Convert.ToSingle(_humidity) };
+                                    EnviromentInfo info = new EnviromentInfo() { hour = DateTime.Parse(day + " " + date[3] + ":00:00"), illumination = Convert.ToByte(_illumination), temperature = Convert.ToSingle(_temperature), humidity = Convert.ToSingle(_humidity) };
                                     infos.Add(info);
                                 }
                             }
@@ -812,10 +826,20 @@ namespace Konke
             return infos;
         }
 
+        public List<IRemoter> GetIRemoters(string userid)
+        {
+            List<IRemoter> irs = new List<IRemoter>();
+            List<Remoter> rs = GetRemoters(userid);
+            irs.AddRange(rs);
+            List<ACRemoter> ars = GetACRemoters(userid);
+            irs.AddRange(ars);
+            return irs;
+        }
+
         public List<PluginInfo> GetPlugins(string kid)
         {
             List<PluginInfo> infos = new List<PluginInfo>();
-            string userid = UserId();
+            string userid = UserID;
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getSingleKStatus";
@@ -832,33 +856,55 @@ namespace Konke
                     string result = token.SelectToken("result").ToString();
                     if (result == "0")
                     {
-                        List<PluginType> module = new List<PluginType>();
-                        JToken ds = token.SelectToken("module");
+                        JToken ds = token.SelectToken("datalist.module");
                         List<JToken> es = GetChildren(ds);
                         if (es.Count > 0)
                         {
                             foreach (JToken e in es)
                             {
-                                PluginType pt = (PluginType)Enum.Parse(typeof(PluginType), e.ToString());
-                                module.Add(pt);
+                                if (e != null)
+                                {
+                                    string t = e.ToString();
+                                    PluginType pt = (PluginType)Enum.Parse(typeof(PluginType), t);
+                                    PluginInfo info = new PluginInfo();
+                                    info.kid = kid;
+                                    info.key = token.SelectToken("datalist.key").ToString();
+                                    info.module = pt;
+                                    infos.Add(info);
+                                }
                             }
                         }
-                        PluginInfo info = new PluginInfo();
-                        info.kid = kid;
-                        info.key = GetJsonValue(token, "key");
-                        info.module = module;
-                        infos.Add(info);
                     }
                 }
             }
             return infos;
         }
 
+        private string GetJsonPropertyValue(JToken token, string name)
+        {
+            if (token != null)
+            {
+                foreach (JToken t in token.Children())
+                {
+                    JProperty p = t as JProperty;
+                    if (p != null && p.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Value != null)
+                            return p.Value.ToString();
+                        else
+                            return "";
+                    }
+                }
+            }
+            return "";
+        }
+
         public List<Remoter> GetRemoters(string userid)
         {
             if (remoters == null)
                 remoters = new List<Remoter>();
-            remoters.Clear();
+            else
+                remoters.Clear();
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/User/getGeneralRemoteList";
@@ -876,18 +922,23 @@ namespace Konke
                     List<JToken> es = GetChildren(ds);
                     if (es.Count > 0)
                     {
+                        int index = 0;
                         foreach (JToken e in es)
                         {
                             string remoteType = GetJsonValue(e, "remoteType");
                             string userId = GetJsonValue(e, "userId");
                             List<Order> _orders = new List<Order>();
                             List<JToken> ess = GetChildren(e);
-                            foreach (JToken r in ess)
+                            JToken orders = ess.Find(a=> a.Path=="datalist["+index+"].orders");
+                            foreach (JToken r in orders.Children())
                             {
-                                string _action = GetJsonValue(e, "action");
-                                string _order = GetJsonValue(e, "order");
-                                Order order = new Order() { action = _action, order = _order };
-                                _orders.Add(order);
+                                foreach (JToken i in r.Children())
+                                {
+                                    string _action = GetJsonValue(i, "action");
+                                    string _order = GetJsonValue(i, "order");
+                                    Order order = new Order() { action = _action, order = _order };
+                                    _orders.Add(order);
+                                }
                             }
                             string _kname = GetJsonValue(e, "kname");
                             string _kid = GetJsonValue(e, "kid");
@@ -901,6 +952,7 @@ namespace Konke
                                 t = RemoteType.射频;
                             }
                             remoters.Add(new Remoter() { rt = t, userid = userId, kname = _kname, orders = _orders, kid = _kid });
+                            index++;
                         }
                     }
                 }
@@ -912,7 +964,8 @@ namespace Konke
         {
             if (acremoters == null)
                 acremoters = new List<ACRemoter>();
-            acremoters.Clear();
+            else
+                acremoters.Clear();
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/User/getAirConditionerRemoteList";
@@ -963,11 +1016,9 @@ namespace Konke
             return acremoters;
         }
 
-        public bool Remote(Remoter r, string order)
+        public bool Remote(string userid, string kid, RemoteType remoteType, string order)
         {
-            string kid = r.kid;
-            string userid = r.userid;
-            string rt = Convert.ToString((int)r.rt);
+            string rt = Convert.ToString((int)remoteType);
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid) && !string.IsNullOrEmpty(rt) && !string.IsNullOrEmpty(order))
             {
                 string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KControl/sendGeneralRemoteOrder";
@@ -990,12 +1041,9 @@ namespace Konke
             return false;
         }
 
-        public bool ACRemote(ACRemoter r, ACState state)
+        public bool ACRemote(string userid, string kid, RemoteType remoteType, string baseOrder, ACState state)
         {
-            string kid = r.kid;
-            string userid = r.userid;
-            string rt = Convert.ToString((int)r.rt);
-            string baseOrder = r.baseOrder;
+            string rt = Convert.ToString((int)remoteType);
             if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid) && !string.IsNullOrEmpty(rt) && !string.IsNullOrEmpty(baseOrder) && state != null)
             {
                 //GetACRemoters(userid);
@@ -1020,6 +1068,60 @@ namespace Konke
                         return result == "0";
                     }
                 //}
+            }
+            return false;
+        }
+
+        public bool DoSwitchKLight(string kid, int openOrClose)
+        {
+            string accesstoken = this.Accesstoken;
+            string userid = this.UserID;
+            if (!string.IsNullOrEmpty(accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
+            {
+                string url = "http://kk.bigk2.com:8080/KOAuthDemeter/User/switchKLight";
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("Authorization", "Bearer " + accesstoken);
+                Dictionary<string, string> postParams = new Dictionary<string, string>();
+                postParams.Add("userid", userid);
+                postParams.Add("kid", kid);
+                postParams.Add("key", openOrClose == 1 ? "open" : "close");
+                string s = RequestUrl(url, Encoding.UTF8, "POST", "application/json", postParams, headers);
+                object o = JsonConvert.DeserializeObject(s);
+                JToken token = o as JToken;
+                if (token != null)
+                {
+                    string result = token.SelectToken("result").ToString();
+                    return result == "0";
+                }
+            }
+            return false;
+        }
+
+        public bool GetKLightInfo(string kid, out string state)
+        {
+            string accesstoken = this.Accesstoken;
+            string userid = this.UserID;
+            state = "close";
+            if (!string.IsNullOrEmpty(accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
+            {
+                string url = "http://kk.bigk2.com:8080/KOAuthDemeter/User/getKLightInfo";
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("Authorization", "Bearer " + accesstoken);
+                Dictionary<string, string> postParams = new Dictionary<string, string>();
+                postParams.Add("userid", userid);
+                postParams.Add("kid", kid);
+                string s = RequestUrl(url, Encoding.UTF8, "POST", "application/json", postParams, headers);
+                object o = JsonConvert.DeserializeObject(s);
+                JToken token = o as JToken;
+                if (token != null)
+                {
+                    string result = token.SelectToken("result").ToString();
+                    if (result == "0")
+                    {
+                        state = token.SelectToken("data").ToString();
+                        return true;
+                    }
+                }
             }
             return false;
         }

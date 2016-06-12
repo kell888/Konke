@@ -112,7 +112,12 @@ namespace Konke
     {
         public string key { get; set; }
         public string kid { get; set; }
-        public List<PluginType> module { get; set; }
+        public PluginType module { get; set; }
+
+        public override string ToString()
+        {
+            return module.ToString() + ":" + key;
+        }
     }
 
     public enum RemoteType

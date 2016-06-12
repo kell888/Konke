@@ -101,7 +101,7 @@ namespace Test
         private void button4_Click(object sender, EventArgs e)
         {
             string access_token = textBox2.Text;
-            string userid = control.UserId();
+            string userid = control.UserID;
             if (userid != "")
             {
                 label5.Text = userid;
@@ -177,7 +177,7 @@ namespace Test
         {
             string userid = label5.Text.Trim();
             if (userid == "")
-                userid = label5.Text = control.UserId();
+                userid = label5.Text = control.UserID;
             this.Cursor = Cursors.WaitCursor;
             try
             {
@@ -211,6 +211,23 @@ namespace Test
                 {
                     openOrClose = k.state == "开";
                     button2.Text = button4.Text = openOrClose ? "关闭" : "开启";
+                    if (k.device_type == "2代")
+                    {
+                        string state;
+                        if (control.GetKLightInfo(k.kid, out state))
+                        {
+                            label10.Text = state;
+                            button13.Text = state == "open" ? "关" : "开";
+                        }
+                    }
+                    else
+                    {
+                        label10.Text = "[未知状态]";
+                    }
+                }
+                else
+                {
+                    label10.Text = "[未知状态]";
                 }
             }
         }
@@ -218,7 +235,7 @@ namespace Test
         private void button9_Click(object sender, EventArgs e)
         {
             string access_token = textBox2.Text;
-            string userid = control.UserId();
+            string userid = control.UserID;
             if (userid != "")
             {
                 label5.Text = userid;
@@ -355,14 +372,17 @@ namespace Test
             StringBuilder sb = new StringBuilder();
             foreach (Konke.Order order in r.orders)
             {
-                if (sb.Length == 0)
+                if (!string.IsNullOrEmpty(order.action))
                 {
-                    sb.Append(order.action + ":" + order.order);
-                }
-                else
-                {
-                    sb.Append(Environment.NewLine);
-                    sb.Append(order.action + ":" + order.order);
+                    if (sb.Length == 0)
+                    {
+                        sb.Append(order.action + ":" + order.order);
+                    }
+                    else
+                    {
+                        sb.Append(Environment.NewLine);
+                        sb.Append(order.action + ":" + order.order);
+                    }
                 }
             }
             return sb.ToString();
@@ -370,7 +390,11 @@ namespace Test
 
         private string GetACRemoterInfo(Konke.ACRemoter r)
         {
-            return r.baseOrder + ":" + r.range;
+            if (!string.IsNullOrEmpty(r.baseOrder))
+            {
+                return r.baseOrder + ":" + r.range;
+            }
+            return "";
         }
 
         private void button10_Click(object sender, EventArgs e)
@@ -381,7 +405,7 @@ namespace Test
         private void GetRemoters()
         {
             listBox3.Items.Clear();
-            List<Konke.Remoter> list = control.GetRemoters(control.UserId());
+            List<Konke.Remoter> list = control.GetRemoters(control.UserID);
             foreach (Konke.Remoter r in list)
             {
                 listBox3.Items.Add(r);
@@ -396,7 +420,7 @@ namespace Test
         private void GetACRemoters()
         {
             listBox3.Items.Clear();
-            List<Konke.ACRemoter> list = control.GetACRemoters(control.UserId());
+            List<Konke.ACRemoter> list = control.GetACRemoters(control.UserID);
             foreach (Konke.ACRemoter acr in list)
             {
                 listBox3.Items.Add(acr);
@@ -407,10 +431,10 @@ namespace Test
         {
             if (listBox1.SelectedIndex > -1)
             {
-                Konke.MiniK device = listBox1.SelectedValue as Konke.MiniK;
+                Konke.MiniK device = listBox1.SelectedItem as Konke.MiniK;
                 if (device != null)
                 {
-                    if (device.device_type == "2")//支持插件的设备类型
+                    if (device.device_type == "2代")//支持插件的设备类型
                     {
                         GetPlugins(device.kid);
                     }
@@ -452,10 +476,10 @@ namespace Test
             }
             if (listBox3.SelectedIndex > -1)
             {
-                Konke.Remoter r = listBox3.SelectedValue as Konke.Remoter;
+                Konke.Remoter r = listBox3.SelectedItem as Konke.Remoter;
                 if (r != null)
                 {
-                    if (control.Remote(r, order))
+                    if (control.Remote(r.userid, r.kid, r.rt, order))
                     {
                         MessageBox.Show("控制成功！");
                     }
@@ -489,13 +513,30 @@ namespace Test
                 textBox4.SelectAll();
                 return;
             }
-            if (listBox3.SelectedIndex > -1)
+            //string userid;
+            //string kid;
+            //if (listBox1.SelectedIndex > -1)
+            //{
+            //    Konke.MiniK device = listBox1.SelectedItem as Konke.MiniK;
+            //    if (device != null)
+            //    {
+            //        userid = device.user_id;
+            //        kid = device.kid;
+            //    }
+            //}
+            //else
+            //{ 
+            //    MessageBox.Show("请选定一个设备！");
+            //    listBox1.Focus();
+            //    return;
+            //}
+                if (listBox3.SelectedIndex > -1)
             {
-                Konke.ACRemoter r = listBox3.SelectedValue as Konke.ACRemoter;
+                Konke.ACRemoter r = listBox3.SelectedItem as Konke.ACRemoter;
                 if (r != null)
                 {
                     Konke.ACState state = Konke.ACState.FromString(order);
-                    if (control.ACRemote(r, state))
+                    if (control.ACRemote(r.userid, r.kid, r.rt, r.baseOrder, state))
                     {
                         MessageBox.Show("控制成功！");
                     }
@@ -519,7 +560,7 @@ namespace Test
         {
             if (listBox3.SelectedIndex > -1)
             {
-                Konke.IRemoter r = listBox3.SelectedValue as Konke.IRemoter;
+                Konke.IRemoter r = listBox3.SelectedItem as Konke.IRemoter;
                 if (r != null)
                 {
                     if (r is Konke.ACRemoter)
@@ -543,11 +584,95 @@ namespace Test
         {
             if (listBox4.SelectedIndex > -1)
             {
-                Konke.PluginInfo pi = listBox4.SelectedValue as Konke.PluginInfo;
+                Konke.PluginInfo pi = listBox4.SelectedItem as Konke.PluginInfo;
                 if (pi != null)
                 {
-                    textBox3.Text = GetEnviromentInfo(pi);
+                    switch (pi.module)
+                    {
+                        case Konke.PluginType.tp_module:
+                            textBox3.Text = GetEnviromentInfo(pi);
+                            break;
+                        case Konke.PluginType.ir_module:
+                        case Konke.PluginType.rf_module:
+                            List<Konke.IRemoter> irs = control.GetIRemoters(control.UserID);
+                            StringBuilder sb = new StringBuilder();
+                            foreach (Konke.IRemoter ir in irs)
+                            {
+                                if (ir is Konke.ACRemoter)
+                                {
+                                    Konke.ACRemoter ar = ir as Konke.ACRemoter;
+                                    string s = GetACRemoterInfo(ar);
+                                    if (sb.Length == 0)
+                                        sb.Append(s);
+                                    else
+                                        sb.Append(Environment.NewLine + s);
+                                }
+                                else
+                                {
+                                    Konke.Remoter r = ir as Konke.Remoter;
+                                    string s = GetRemoterInfo(r);
+                                    if (sb.Length == 0)
+                                        sb.Append(s);
+                                    else
+                                        sb.Append(Environment.NewLine + s);
+                                }
+                            }
+                            textBox3.Text = sb.ToString();
+                            break;
+                        case Konke.PluginType.rt_module:
+                        case Konke.PluginType.vd_module:
+                        case Konke.PluginType.yg_module:
+                            break;
+                    }
                 }
+            }
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                if (listBox1.SelectedItems.Count > 0)
+                {
+                    bool state = label10.Text == "关";
+                    bool someOneFalse = false;
+                    foreach (object o in listBox1.SelectedItems)
+                    {
+                        Konke.MiniK k = o as Konke.MiniK;
+                        if (k != null)
+                        {
+                            bool f = control.DoSwitchKLight(k.kid, state ? 1 : 0);
+                            if (f)
+                            {
+                                state = !state;
+                                label10.Text = state ? "开" : "关";
+                                button13.Text = state ? "关" : "开";
+                            }
+                            else
+                            {
+                                someOneFalse = true;
+                            }
+                        }
+                    }
+                    if (someOneFalse)
+                    {
+                        MessageBox.Show("选定的设备中，至少有一个小夜灯控制失败！");
+                    }
+                    else
+                    {
+                        MessageBox.Show("选定的设备全部小夜灯" + (state ? "开启" : "关闭") + "成功！");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("请先选定要操作的设备！");
+                }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
     }

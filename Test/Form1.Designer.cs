@@ -59,9 +59,12 @@
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.button23 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBox5 = new System.Windows.Forms.TextBox();
             this.button24 = new System.Windows.Forms.Button();
             this.listBox4 = new System.Windows.Forms.ListBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.button13 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -352,6 +355,7 @@
             this.textBox3.Location = new System.Drawing.Point(488, 447);
             this.textBox3.Multiline = true;
             this.textBox3.Name = "textBox3";
+            this.textBox3.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox3.Size = new System.Drawing.Size(211, 148);
             this.textBox3.TabIndex = 17;
             // 
@@ -394,6 +398,13 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "空调遥控";
             // 
+            // textBox5
+            // 
+            this.textBox5.Location = new System.Drawing.Point(7, 46);
+            this.textBox5.Name = "textBox5";
+            this.textBox5.Size = new System.Drawing.Size(226, 28);
+            this.textBox5.TabIndex = 21;
+            // 
             // button24
             // 
             this.button24.Location = new System.Drawing.Point(239, 40);
@@ -414,18 +425,43 @@
             this.listBox4.TabIndex = 16;
             this.listBox4.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listBox4_MouseClick);
             // 
-            // textBox5
+            // label9
             // 
-            this.textBox5.Location = new System.Drawing.Point(7, 46);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(226, 28);
-            this.textBox5.TabIndex = 21;
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(488, 410);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(80, 18);
+            this.label9.TabIndex = 20;
+            this.label9.Text = "小夜灯：";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.ForeColor = System.Drawing.Color.Blue;
+            this.label10.Location = new System.Drawing.Point(555, 410);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(98, 18);
+            this.label10.TabIndex = 20;
+            this.label10.Text = "[未知状态]";
+            // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(648, 401);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(51, 37);
+            this.button13.TabIndex = 21;
+            this.button13.Text = "开";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1023, 615);
+            this.Controls.Add(this.button13);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.textBox3);
@@ -506,6 +542,9 @@
         private System.Windows.Forms.Button button24;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button button13;
     }
 }
 
