@@ -349,7 +349,6 @@ namespace Test
                 if (sb.Length == 0)
                 {
                     sb.Append(info.hour);
-                    sb.Append(Environment.NewLine + info.hour);
                     sb.Append(Environment.NewLine + info.illumination);
                     sb.Append(Environment.NewLine + info.temperature);
                     sb.Append(Environment.NewLine + info.humidity);
@@ -358,10 +357,48 @@ namespace Test
                 {
                     sb.Append(Environment.NewLine + Environment.NewLine);
                     sb.Append(info.hour);
-                    sb.Append(Environment.NewLine + info.hour);
                     sb.Append(Environment.NewLine + info.illumination);
                     sb.Append(Environment.NewLine + info.temperature);
                     sb.Append(Environment.NewLine + info.humidity);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private string GetHumanInfo(string kid)
+        {
+            List<Konke.HumanInfo> infos = control.GetHumanInfo(kid);
+            StringBuilder sb = new StringBuilder();
+            foreach (Konke.HumanInfo info in infos)
+            {
+                if (sb.Length == 0)
+                {
+                    sb.Append(info.hour);
+                    sb.Append(Environment.NewLine + info.reduceCount);
+                }
+                else
+                {
+                    sb.Append(Environment.NewLine + Environment.NewLine);
+                    sb.Append(info.hour);
+                    sb.Append(Environment.NewLine + info.reduceCount);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private string GetLatestHumanInfo(string kid)
+        {
+            List<DateTime> infos = control.GetLatestHumanInfo(kid);
+            StringBuilder sb = new StringBuilder();
+            foreach (DateTime info in infos)
+            {
+                if (sb.Length == 0)
+                {
+                    sb.Append(info.ToString("yyyy-MM-dd HH:mm:ss"));
+                }
+                else
+                {
+                    sb.Append(Environment.NewLine + info.ToString("yyyy-MM-dd HH:mm:ss"));
                 }
             }
             return sb.ToString();
@@ -620,6 +657,8 @@ namespace Test
                             textBox3.Text = sb.ToString();
                             break;
                         case Konke.PluginType.rt_module:
+                            textBox3.Text = GetLatestHumanInfo(pi.kid);
+                            break;
                         case Konke.PluginType.vd_module:
                         case Konke.PluginType.yg_module:
                             break;
@@ -645,7 +684,6 @@ namespace Test
                             bool f = control.DoSwitchKLight(k.kid, state ? 1 : 0);
                             if (f)
                             {
-                                state = !state;
                                 label10.Text = state ? "开" : "关";
                                 button13.Text = state ? "关" : "开";
                             }

@@ -244,4 +244,15 @@ namespace Konke
         string kid { get; set; }
         string userid { get; set; }
     }
+
+    public class HumanInfo
+    {
+        public DateTime hour { get; set; }
+        public int reduceCount { get; set; }
+
+        public override string ToString()
+        {
+            return "[" + hour.ToString("yyyy-MM-dd HH") + ":00:00]" + reduceCount + "次";
+        }
+    }
 }

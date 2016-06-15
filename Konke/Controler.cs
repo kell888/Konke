@@ -826,6 +826,91 @@ namespace Konke
             return infos;
         }
 
+        public List<HumanInfo> GetHumanInfo(string kid)
+        {
+            List<HumanInfo> infos = new List<HumanInfo>();
+            string userid = UserID;
+            if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
+            {
+                string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getKHumanInfo";
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("Authorization", "Bearer " + _accesstoken);
+                Dictionary<string, string> postParams = new Dictionary<string, string>();
+                postParams.Add("userid", userid);
+                postParams.Add("kid", kid);
+                string s = RequestUrl(url, Encoding.UTF8, "POST", "application/json", postParams, headers);
+                object o = JsonConvert.DeserializeObject(s);
+                JToken token = o as JToken;
+                if (token != null)
+                {
+                    string result = token.SelectToken("result").ToString();
+                    if (result == "0")
+                    {
+                        JToken ds = token.SelectToken("datalist");
+                        List<JToken> es = GetChildren(ds);
+                        if (es.Count > 0)
+                        {
+                            foreach (JToken e in es)
+                            {
+                                string _hour = GetJsonValue(e, "hour");
+                                string[] date = _hour.Split('-');
+                                if (date.Length == 4)
+                                {
+                                    string day = date[0] + "-" + date[1] + "-" + date[2];
+                                    string _reduceCount = GetJsonValue(e, "reduceCount");
+                                    HumanInfo info = new HumanInfo() { hour = DateTime.Parse(day + " " + date[3] + ":00:00"),  reduceCount = Convert.ToInt32(_reduceCount) };
+                                    infos.Add(info);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return infos;
+        }
+
+        public List<DateTime> GetLatestHumanInfo(string kid)
+        {
+            List<DateTime> infos = new List<DateTime>();
+            string userid = UserID;
+            if (!string.IsNullOrEmpty(_accesstoken) && !string.IsNullOrEmpty(userid) && !string.IsNullOrEmpty(kid))
+            {
+                string url = "http://kk.bigk2.com:8080/KOAuthDemeter/KInfo/getKLastestHumanInfo";
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("Authorization", "Bearer " + _accesstoken);
+                Dictionary<string, string> postParams = new Dictionary<string, string>();
+                postParams.Add("userid", userid);
+                postParams.Add("kid", kid);
+                string s = RequestUrl(url, Encoding.UTF8, "POST", "application/json", postParams, headers);
+                object o = JsonConvert.DeserializeObject(s);
+                JToken token = o as JToken;
+                if (token != null)
+                {
+                    string result = token.SelectToken("result").ToString();
+                    if (result == "0")
+                    {
+                        JToken ds = token.SelectToken("datalist");
+                        List<JToken> es = GetChildren(ds);
+                        if (es.Count > 0)
+                        {
+                            foreach (JToken e in es)
+                            {
+                                string _hour = e.ToString();
+                                string[] date = _hour.Split('-');
+                                if (date.Length == 4)
+                                {
+                                    string day = date[0] + "-" + date[1] + "-" + date[2];
+                                    DateTime info = DateTime.Parse(day + " " + date[3]);
+                                    infos.Add(info);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return infos;
+        }
+
         public List<IRemoter> GetIRemoters(string userid)
         {
             List<IRemoter> irs = new List<IRemoter>();
